@@ -23,24 +23,27 @@
     position: absolute;   /* располагаем текст поверх картинки */
     top: 0;
     right: 0;
-    padding: 4rem 4rem 0 1rem; /* отступы от правого и верхнего края */
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    color: #ffffff;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    color: #000000;
+    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.8);
 }
 
 .lines-container {
-    position: relative;
-    width: 45%;
-    max-width: 520px;
+    position: absolute;
+    width: 45vw;
     height: calc(
-        2 * (clamp(1.8rem, 4vw, 2.6rem) * 1.25) + 
-        2 * 0.5rem +   /* padding сверху и снизу у каждой строки */
-        0.3rem );
+            2 * (4vw * 1.25) +
+            2 * 0.5rem +   /* padding сверху и снизу у каждой строки */
+            0.3rem );
     overflow: hidden;
     margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+
 }
 
 .lines {
@@ -93,7 +96,6 @@
     opacity: 0;
     transform: translateY(-20px);
 }
-
 /* На стандартном "широком" окне (примерно 16:9 и шире):
    картинка подгоняется по высоте окна, чтобы целиком влезать,
    а по бокам остаются поля. */
@@ -109,4 +111,9 @@
         height: 100vh;  /* заполняем высоту окна */
         width: auto;    /* ширина подстраивается, появляются поля слева/справа */
     }
+}
+
+.image-wrapper {
+    position: relative;
+    display: inline-block; /* чтобы wrapper не растягивался на всю ширину */
 }
