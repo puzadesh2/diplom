@@ -19,6 +19,15 @@
     margin: 0 auto;
 }
 
+.overlay-img {
+    position: absolute;
+    top: 70%;
+    left: 0;
+    width: auto;
+    height: auto;
+    pointer-events: none; /* чтобы не мешало взаимодействию с текстом */
+}
+
 .section1-img.zoomed {
     transform: scale(2);
     transform-origin: 20% 50%;
