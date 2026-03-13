@@ -1,6 +1,14 @@
 (function () {
+    // Отключаем восстановление позиции скролла браузером
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+    // Прокручиваем к началу
+    window.scrollTo(0, 0);
+
     const linesContainer = document.querySelector(".lines");
     const hint = document.getElementById("hint");
+    const img = document.querySelector('.section1-img');
 
     const poemLines = [
         "У лукоморья дуб зелёный;",
@@ -68,6 +76,8 @@
             }
 
             shiftsDone++;
+
+            img.classList.add('zoomed');
 
             if (shiftsDone >= maxShiftsBeforeFreeScroll) {
                 window.removeEventListener("wheel", handleWheel, { passive: false });

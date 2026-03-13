@@ -19,6 +19,12 @@
     margin: 0 auto;
 }
 
+.section1-img.zoomed {
+    transform: scale(2);
+    transform-origin: 20% 50%;
+    transition: transform 0.7s ease;
+}
+
 .intro-inner {
     position: absolute;   /* располагаем текст поверх картинки */
     top: 0;
@@ -116,4 +122,5 @@
 .image-wrapper {
     position: relative;
     display: inline-block; /* чтобы wrapper не растягивался на всю ширину */
+    overflow: hidden; /* чтобы при увеличении изображения края обрезались */
 }
