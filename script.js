@@ -101,3 +101,50 @@
 
     window.addEventListener("wheel", handleWheel, { passive: false });
 })();
+
+// Smooth section snapping with JS
+(function() {
+    let isScrolling = false;
+    let scrollTimeout;
+
+    // Custom smooth scroll function
+    function smoothScrollTo(targetY, duration = 2000) {
+        const startY = window.scrollY;
+        const distance = targetY - startY;
+        const startTime = performance.now();
+
+        function animation(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeInOut = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            window.scrollTo(0, startY + distance * easeInOut);
+
+            if (progress < 1) {
+                requestAnimationFrame(animation);
+            }
+        }
+
+        requestAnimationFrame(animation);
+    }
+
+    window.addEventListener('scroll', () => {
+        if (isScrolling) return;
+
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            const sections = document.querySelectorAll('.section');
+            const scrollY = window.scrollY + window.innerHeight / 1.1; // center of viewport
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionBottom = sectionTop + section.offsetHeight;
+
+                if (scrollY >= sectionTop && scrollY < sectionBottom) {
+                    isScrolling = true;
+                    smoothScrollTo(sectionTop, 2500); // 2.5 seconds
+                    setTimeout(() => isScrolling = false, 3000); // allow more time
+                }
+            });
+        }, 100); // debounce
+    });
+})();
