@@ -58,18 +58,20 @@
             linesContainer.innerHTML = "";
 
             let added = 0;
+            const newLines = [];
             while (currentIndex < poemLines.length && added < 2) {
                 const newLine = createLine(poemLines[currentIndex]);
                 newLine.classList.add("enter");
                 linesContainer.appendChild(newLine);
-
-                requestAnimationFrame(() => {
-                    newLine.classList.add("enter-active");
-                });
+                newLines.push(newLine);
 
                 currentIndex++;
                 added++;
             }
+
+            setTimeout(() => {
+                newLines.forEach(el => el.classList.add("enter-active"));
+            }, 50);
 
             if (hint && shiftsDone === 0) {
                 hint.classList.add("hidden");

@@ -27,7 +27,7 @@
 
 .intro-inner {
     position: absolute;   /* располагаем текст поверх картинки */
-    top: 0;
+    top: 10%;
     right: 0;
     display: flex;
     flex-direction: column;
@@ -57,9 +57,6 @@
     top: 0;
     left: 0;
     width: 100%;
-    transition: transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1),
-    opacity 0.7s ease;
-    will-change: transform, opacity;
 }
 
 .line-item {
@@ -70,6 +67,7 @@
     text-align: center;
     opacity: 1;
     transition: opacity 0.35s ease, transform 0.35s ease;
+    will-change: transform, opacity;
     padding: 0.2rem 0;
 }
 
@@ -85,7 +83,7 @@
 
 .line-item.enter {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(50px);
 }
 
 .line-item.enter-active {
@@ -100,7 +98,7 @@
 
 .line-item.leave-active {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-50px);
 }
 /* На стандартном "широком" окне (примерно 16:9 и шире):
    картинка подгоняется по высоте окна, чтобы целиком влезать,
