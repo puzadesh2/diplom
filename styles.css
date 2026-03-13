@@ -1,0 +1,112 @@
+/* Стили для секций */
+.section {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.section1 {
+    /* высота секции = высота изображения */
+    display: block;
+}
+
+.section1-img {
+    display: block;
+    width: 100%;
+    height: auto;        /* по умолчанию — картинка тянется на всю ширину */
+    margin: 0 auto;
+}
+
+.intro-inner {
+    position: absolute;   /* располагаем текст поверх картинки */
+    top: 0;
+    right: 0;
+    padding: 4rem 4rem 0 1rem; /* отступы от правого и верхнего края */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.lines-container {
+    position: relative;
+    width: 45%;
+    max-width: 520px;
+    height: calc(
+        2 * (clamp(1.8rem, 4vw, 2.6rem) * 1.25) + 
+        2 * 0.5rem +   /* padding сверху и снизу у каждой строки */
+        0.3rem );
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    transition: transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1),
+    opacity 0.7s ease;
+    will-change: transform, opacity;
+}
+
+.line-item {
+    font-size: clamp(0.65rem, 3.25vw, 1.95rem);
+    line-height: 1.25;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-align: center;
+    opacity: 1;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    padding: 0.2rem 0;
+}
+
+.line-item.fading {
+    opacity: 0;
+}
+
+/* для второй и последующих строк можно добавить лёгкий blur при уходе, если хочется */
+.line-item.leaving {
+    opacity: 0;
+    filter: blur(2px);
+}
+
+.line-item.enter {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.line-item.enter-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.line-item.leave {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.line-item.leave-active {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+/* На стандартном "широком" окне (примерно 16:9 и шире):
+   картинка подгоняется по высоте окна, чтобы целиком влезать,
+   а по бокам остаются поля. */
+@media (min-aspect-ratio: 16/9) {
+    .section1 {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .section1-img {
+        height: 100vh;  /* заполняем высоту окна */
+        width: auto;    /* ширина подстраивается, появляются поля слева/справа */
+    }
+}

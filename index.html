@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>У Лукоморья</title>
+
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Секция 1 -->
+<section class="section section1" id="section1">
+    <!-- Само изображение: задаёт высоту секции, всегда целиком, без обрезки -->
+    <img src="images/test2.png" alt="У лукоморья" class="section1-img">
+
+    <!-- Блок с текстом поверх изображения -->
+    <div class="intro-inner">
+        <div class="lines-container">
+            <div class="lines">
+                <!-- строки добавляются динамически через JS -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Секция 2 -->
+<section class="section section2" id="section2">
+    <div class="next-section-content">
+        <h2>Продолжение сайта</h2>
+        <p>
+            Здесь начинается обычный контент страницы. После того как строки из вступительной
+            секции «прокручены», скролл работает стандартно.
+        </p>
+        <p>
+            Добавьте сюда ваши блоки, текст, изображения и т.д. — сайт будет вести себя как
+            обычная страница.
+        </p>
+        <!-- можно добавить сколько угодно контента -->
+        <p>Lorem ipsum dolor sit amet...</p>
+    </div>
+</section>
+
+<!-- Подключаем javascript в самом конце body -->
+<script src="script.js"></script>
+</body>
+</html>
