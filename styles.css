@@ -18,6 +18,8 @@
     width: 100%;
     height: auto;        /* по умолчанию — картинка тянется на всю ширину */
     margin: 0 auto;
+    transition: transform 1s ease-in-out;
+    will-change: transform;
 }
 
 .overlay-img {
@@ -30,9 +32,12 @@
 }
 
 .section1-img.zoomed {
-    transform: scale(2);
-    transform-origin: 20% 50%;
-    transition: transform 0.7s ease;
+    transform: scale(1.4);
+    transform-origin: 20% 50%; /* центр масштабирования ближе к левому боку */
+}
+
+.section1-img.pan-right {
+    transform: translateX(20%); /* сдвиг в другую сторону: показываем левую/противоположную часть */
 }
 
 .intro-inner {
@@ -111,10 +116,11 @@
     transform: translateY(-50px);
 }
 /* На стандартном "широком" окне (примерно 16:9 и шире):
-   картинка подгоняется по высоте окна, чтобы целиком влезать,
+   для ОБЕИХ секций картинка подгоняется по высоте окна, чтобы целиком влезать,
    а по бокам остаются поля. */
 @media (min-aspect-ratio: 16/9) {
-    .section1 {
+    .section1,
+    .section2 {
         height: 100vh;
         display: flex;
         justify-content: center;
