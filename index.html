@@ -2,53 +2,21 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>У Лукоморья</title>
-
-    <!-- Подключаем стили -->
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Фотографии</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
-<!-- Секция 1 -->
-<section class="section section1" id="section1" style="background: rebeccapurple">
-    <!-- Обёртка для изображения и текста -->
-    <div class="image-wrapper" style="background-color: #d46262;">
-        <!-- Само изображение: задаёт высоту секции, всегда целиком, без обрезки -->
-        <img src="images/test5.png" alt="У лукоморья" class="section1-img">
-
-        <!-- Наложенное изображение -->
-        <img src="images/test6.png" alt="" class="overlay-img">
-
-        <!-- Блок с текстом поверх изображения -->
-        <div class="intro-inner" style="background-color:#c22525;">
-            <div class="lines-container" style="background-color: aquamarine">
-                <div class="lines">
-                    <!-- строки добавляются динамически через JS -->
-                </div>
-            </div>
+    <main class="page">
+        <div class="wrapper">
+            <img src="images/test9.png" alt="" class="photo" />
         </div>
-    </div>
-</section>
-
-<!-- Секция 2 -->
-<section class="section section2" id="section2">
-    <div class="image-wrapper">
-        <img src="images/test7.png" alt="" class="section1-img">
-        <div class="intro-inner">
-            <div class="lines-container">
-                <div class="lines">
-                    <div class="line-item">У лукоморья дуб зелёный;</div>
-                    <div class="line-item">Златая цепь на дубе том:</div>
-                    <div class="line-item">И днём и ночью кот учёный</div>
-                    <div class="line-item">Всё ходит по цепи кругом;</div>
-                </div>
-            </div>
+        <div class="wrapper">
+            <img src="images/test9.png" alt="" class="photo" />
         </div>
-    </div>
-</section>
-
-<!-- Подключаем javascript в самом конце body -->
-<script src="script.js"></script>
+        <div class="wrapper">
+            <img src="images/test9.png" alt="" class="photo" />
+        </div>
+    </main>
 </body>
 </html>

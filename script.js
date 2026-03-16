@@ -81,17 +81,7 @@
 
             shiftsDone++;
 
-            // ВТОРАЯ пара: "И днём и ночью кот учёный", "Всё ходит по цепи кругом;"
-            // при появлении этой пары увеличиваем изображение (zoom).
-            if (shiftsDone === 1 && img) {
-                img.classList.add('zoomed');
-            }
-
-            // ТРЕТЬЯ пара: "ddddddddddd", "ssssssssssssssss;"
-            // при появлении этой пары картинка едет по горизонтали.
-            if (shiftsDone === 2 && img) {
-                img.classList.add('pan-right');
-            }
+            img.classList.add('zoomed');
 
             if (shiftsDone >= maxShiftsBeforeFreeScroll) {
                 window.removeEventListener("wheel", handleWheel, { passive: false });

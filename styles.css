@@ -1,140 +1,64 @@
-/* Стили для секций */
-.section {
-    width: 100%;
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    position: relative;
-    overflow: hidden;
-    min-height: 100vh;
 }
 
-.section1 {
-    /* высота секции = высота изображения */
-    display: block;
+body {
+    font-family: system-ui, sans-serif;
+    background: #111;
+    min-height: 100vh;           /* на всякий случай */
 }
 
-.section1-img {
-    display: block;
-    width: 100%;
-    height: auto;        /* по умолчанию — картинка тянется на всю ширину */
-    margin: 0 auto;
-    transition: transform 1s ease-in-out;
-    will-change: transform;
-}
-
-.overlay-img {
-    position: absolute;
-    top: 70%;
-    left: 0;
-    width: auto;
-    height: auto;
-    pointer-events: none; /* чтобы не мешало взаимодействию с текстом */
-}
-
-.section1-img.zoomed {
-    transform: scale(1.4);
-    transform-origin: 20% 50%; /* центр масштабирования ближе к левому боку */
-}
-
-.section1-img.pan-right {
-    transform: translateX(20%); /* сдвиг в другую сторону: показываем левую/противоположную часть */
-}
-
-.intro-inner {
-    position: absolute;   /* располагаем текст поверх картинки */
-    top: 10%;
-    right: 0;
+.page {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    color: #000000;
-    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.8);
-}
-
-.lines-container {
-    position: absolute;
-    width: 45vw;
-    height: calc(
-            2 * (4vw * 1.25) +
-            2 * 0.5rem +   /* padding сверху и снизу у каждой строки */
-            0.3rem );
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-
-}
-
-.lines {
-    position: absolute;
-    top: 0;
-    left: 0;
+    align-items: center;
     width: 100%;
+    min-height: 100vh;
+
+    /* Боковые отступы — будут уменьшаться на узких экранах */
+    padding-left:  env(safe-area-inset-left, 16px);
+    padding-right: env(safe-area-inset-right, 16px);
+
+    /* или фиксированные + медиа-запросы */
+    padding-left: 5vw;
+    padding-right: 5vw;
 }
 
-.line-item {
-    font-size: clamp(0.65rem, 3.25vw, 1.95rem);
-    line-height: 1.25;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    text-align: center;
-    opacity: 1;
-    transition: opacity 0.35s ease, transform 0.35s ease;
-    will-change: transform, opacity;
-    padding: 0.2rem 0;
+/* Главный трюк — ограничиваем максимальную высоту одного wrapper */
+.wrapper {
+    /* Соотношение сторон: ширина : высота = 3 : 2 (1.5) */
+    aspect-ratio: 3 / 2;
+
+    /* Не шире экрана с учётом padding'ов */
+    max-width: 100%;
+
+    /* Самое важное — не выше видимой области окна */
+    max-height: 100vh;
+
+    width: 100%;                   /* стараемся занять всю доступную ширину */
+    overflow: hidden;
+    background: #111;
 }
 
-.line-item.fading {
-    opacity: 0;
-}
-
-/* для второй и последующих строк можно добавить лёгкий blur при уходе, если хочется */
-.line-item.leaving {
-    opacity: 0;
-    filter: blur(2px);
-}
-
-.line-item.enter {
-    opacity: 0;
-    transform: translateY(50px);
-}
-
-.line-item.enter-active {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.line-item.leave {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.line-item.leave-active {
-    opacity: 0;
-    transform: translateY(-50px);
-}
-/* На стандартном "широком" окне (примерно 16:9 и шире):
-   для ОБЕИХ секций картинка подгоняется по высоте окна, чтобы целиком влезать,
-   а по бокам остаются поля. */
-@media (min-aspect-ratio: 16/9) {
-    .section1,
-    .section2 {
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-    }
-
-    .section1-img {
-        height: 100vh;  /* заполняем высоту окна */
-        width: auto;    /* ширина подстраивается, появляются поля слева/справа */
+/* На очень широких экранах не даём wrapper растягиваться бесконечно */
+@media (min-aspect-ratio: 3/2) {
+    .wrapper {
+        width: auto;                /* теперь ширина определяется высотой */
+        max-width: none;
+        height: 100vh;              /* прибиваем к высоте экрана */
+        max-height: 100vh;
     }
 }
 
-.image-wrapper {
-    position: relative;
-    display: inline-block; /* чтобы wrapper не растягивался на всю ширину */
-    overflow: hidden; /* чтобы при увеличении изображения края обрезались */
+/* Фото внутри */
+.photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;       /* центр — самый безопасный вариант */
+    /* Если хочешь обрезать именно слева → object-position: right center; */
+    display: block;
 }
+
