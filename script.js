@@ -135,7 +135,7 @@
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             const sections = document.querySelectorAll('.section');
-            const scrollY = window.scrollY + window.innerHeight / 1.7; // center of viewport
+            const scrollY = window.scrollY + window.innerHeight / 1.6; // center of viewport
 
             sections.forEach(section => {
                 const sectionTop = section.offsetTop;
@@ -143,7 +143,7 @@
 
                 if (scrollY >= sectionTop && scrollY < sectionBottom) {
                     isScrolling = true;
-                    smoothScrollTo(sectionTop, 2500); // 2.5 seconds
+                    smoothScrollTo(sectionTop, 500); // 2.5 seconds
                     setTimeout(() => isScrolling = false, 3000); // allow more time
                 }
             });
