@@ -14,13 +14,15 @@
         "У лукоморья дуб зелёный;",
         "Златая цепь на дубе том:",
         "И днём и ночью кот учёный",
-        "Всё ходит по цепи кругом;"
+        "Всё ходит по цепи кругом;",
+        "ddddddddddd",
+        "ssssssssssssssss;"
     ];
 
     let currentIndex = 2;          // следующая пара после первых двух
     let animating = false;
     let shiftsDone = 0;            // сколько раз уже сменили пару строк
-    const maxShiftsBeforeFreeScroll = 1; // после одной смены пары даём обычный скролл
+    const maxShiftsBeforeFreeScroll = 2; // после одной смены пары даём обычный скролл
 
     function createLine(text) {
         const div = document.createElement("div");
@@ -133,7 +135,7 @@
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             const sections = document.querySelectorAll('.section');
-            const scrollY = window.scrollY + window.innerHeight / 1.1; // center of viewport
+            const scrollY = window.scrollY + window.innerHeight / 1.7; // center of viewport
 
             sections.forEach(section => {
                 const sectionTop = section.offsetTop;
