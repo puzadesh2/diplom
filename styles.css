@@ -40,6 +40,8 @@ body {
     width: 100%;                   /* стараемся занять всю доступную ширину */
     overflow: hidden;
     background: #111;
+    /* Якорь для position:absolute у .intro-inner — иначе координаты считаются от окна, не от слайда */
+    position: relative;
 }
 
 /* На очень широких экранах не даём wrapper растягиваться бесконечно */
@@ -61,4 +63,78 @@ body {
     /* Если хочешь обрезать именно слева → object-position: right center; */
     display: block;
 }
+.intro-inner {
+    position: absolute;   /* располагаем текст поверх картинки */
+    top: 10%;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: #000000;
+    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.8);
+}
 
+.lines-container {
+    position: absolute;
+    width: 45vw;
+    height: calc(
+            2 * (4vw * 1.25) +
+            2 * 0.5rem +   /* padding сверху и снизу у каждой строки */
+            0.3rem );
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+
+}
+
+.lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.line-item {
+    font-size: clamp(0.65rem, 3.25vw, 1.95rem);
+    line-height: 1.25;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-align: center;
+    opacity: 1;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    will-change: transform, opacity;
+    padding: 0.2rem 0;
+}
+
+.line-item.fading {
+    opacity: 0;
+}
+
+/* для второй и последующих строк можно добавить лёгкий blur при уходе, если хочется */
+.line-item.leaving {
+    opacity: 0;
+    filter: blur(2px);
+}
+
+.line-item.enter {
+    opacity: 0;
+    transform: translateY(50px);
+}
+
+.line-item.enter-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.line-item.leave {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.line-item.leave-active {
+    opacity: 0;
+    transform: translateY(-50px);
+}

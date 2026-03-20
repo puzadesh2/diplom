@@ -8,7 +8,7 @@
 
     const linesContainer = document.querySelector(".lines");
     const hint = document.getElementById("hint");
-    const img = document.querySelector('.section1-img');
+    const img = document.querySelector('.wrapper .photo');
 
     const poemLines = [
         "У лукоморья дуб зелёный;",
@@ -19,10 +19,11 @@
         "ssssssssssssssss;"
     ];
 
-    let currentIndex = 2;          // следующая пара после первых двух
+    /* После стартовой пары [0,1] следующий скролл показывает [1,2] (стр. 15–16 в файле), затем колесо снова обычное */
+    let currentIndex = 2;
     let animating = false;
-    let shiftsDone = 0;            // сколько раз уже сменили пару строк
-    const maxShiftsBeforeFreeScroll = 2; // после одной смены пары даём обычный скролл
+    let shiftsDone = 0;
+    const maxShiftsBeforeFreeScroll = 1;
 
     function createLine(text) {
         const div = document.createElement("div");
@@ -81,7 +82,13 @@
 
             shiftsDone++;
 
-            img.classList.add('zoomed');
+            // ВТОРАЯ пара: zoom; третья: pan (классы в CSS при необходимости)
+            if (shiftsDone === 1 && img) {
+                img.classList.add('zoomed');
+            }
+            if (shiftsDone === 2 && img) {
+                img.classList.add('pan-right');
+            }
 
             if (shiftsDone >= maxShiftsBeforeFreeScroll) {
                 window.removeEventListener("wheel", handleWheel, { passive: false });
