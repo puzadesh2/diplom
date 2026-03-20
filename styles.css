@@ -59,12 +59,24 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;       /* центр — самый безопасный вариант */
-    /* Если хочешь обрезать именно слева → object-position: right center; */
+    object-position: center;
     display: block;
+    transition: transform 0.75s ease-out;
+}
+
+/* Первый слайд (test8): при cover отбрасываем лишнее слева, видна правая часть кадра */
+.page > .wrapper:first-child .photo {
+    object-position: right center;
+}
+
+.page > .wrapper:first-child .photo.zoomed {
+    transform: scale(1.5);
+    /* приближение к левой части кадра, а не к центру */
+    transform-origin: left center;
 }
 .intro-inner {
     position: absolute;   /* располагаем текст поверх картинки */
+    top: 0;
     top: 10%;
     right: 0;
     display: flex;
@@ -95,6 +107,9 @@ body {
     top: 0;
     left: 0;
     width: 100%;
+    transition: transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1),
+    opacity 0.7s ease;
+    will-change: transform, opacity;
 }
 
 .line-item {

@@ -8,7 +8,7 @@
 
     const linesContainer = document.querySelector(".lines");
     const hint = document.getElementById("hint");
-    const img = document.querySelector('.wrapper .photo');
+    const img = document.querySelector('.page > .wrapper:first-child .photo');
 
     const poemLines = [
         "У лукоморья дуб зелёный;",
@@ -19,8 +19,8 @@
         "ssssssssssssssss;"
     ];
 
-    /* После стартовой пары [0,1] следующий скролл показывает [1,2] (стр. 15–16 в файле), затем колесо снова обычное */
-    let currentIndex = 2;
+    /* После стартовой пары [0,1] следующий скролл показывает [1,2] (стр. 15–16 в файле); zoomed — сразу при этой смене */
+    let currentIndex = 1;
     let animating = false;
     let shiftsDone = 0;
     const maxShiftsBeforeFreeScroll = 1;
