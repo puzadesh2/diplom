@@ -19,11 +19,11 @@
         "ssssssssssssssss;"
     ];
 
-    /* После стартовой пары [0,1] следующий скролл показывает [1,2] (стр. 15–16 в файле); zoomed — сразу при этой смене */
-    let currentIndex = 1;
+    /* Старт [0,1]. 1-й скролл: [2,3] + zoom. 2-й: [4,5], картинка без уменьшения сдвигается вправо (translateX). */
+    let currentIndex = 2;
     let animating = false;
     let shiftsDone = 0;
-    const maxShiftsBeforeFreeScroll = 1;
+    const maxShiftsBeforeFreeScroll = 2;
 
     function createLine(text) {
         const div = document.createElement("div");
@@ -82,12 +82,11 @@
 
             shiftsDone++;
 
-            // ВТОРАЯ пара: zoom; третья: pan (классы в CSS при необходимости)
             if (shiftsDone === 1 && img) {
                 img.classList.add('zoomed');
             }
             if (shiftsDone === 2 && img) {
-                img.classList.add('pan-right');
+                img.classList.add('photo-pan-shift');
             }
 
             if (shiftsDone >= maxShiftsBeforeFreeScroll) {

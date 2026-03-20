@@ -64,15 +64,30 @@ body {
     transition: transform 0.75s ease-out;
 }
 
-/* Первый слайд (test8): при cover отбрасываем лишнее слева, видна правая часть кадра */
+/*
+  Первый слайд (test8): картинка шире блока и прижата вправо — тогда translate не оставляет «дыр» с фоном.
+  Иначе при width:100% сдвиг вправо открывает слева фон родителя, а не другой участок файла.
+*/
 .page > .wrapper:first-child .photo {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: auto;
+    width: 150%;
+    max-width: none;
+    height: 100%;
+    object-fit: cover;
     object-position: right center;
+    transition: transform 1s ease-in-out;
 }
 
 .page > .wrapper:first-child .photo.zoomed {
-    transform: scale(1.5);
-    /* приближение к левой части кадра, а не к центру */
+    transform: scale(1.3);
     transform-origin: left center;
+}
+
+.page > .wrapper:first-child .photo.zoomed.photo-pan-shift {
+    transform: scale(1.5) translateX(20%);
 }
 .intro-inner {
     position: absolute;   /* располагаем текст поверх картинки */
