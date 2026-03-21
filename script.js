@@ -19,11 +19,10 @@
         "ssssssssssssssss;"
     ];
 
-    /* Старт [0,1]. 1-й скролл: [2,3] + zoom. 2-й: [4,5], картинка без уменьшения сдвигается вправо (translateX). */
+    /* [0,1] → скролл1: [2,3]+zoom → скролл2: пан test8 вправо + строки [4,5] (стр.18–19) одновременно */
     let currentIndex = 2;
     let animating = false;
     let shiftsDone = 0;
-    const maxShiftsBeforeFreeScroll = 2;
 
     function createLine(text) {
         const div = document.createElement("div");
@@ -85,11 +84,8 @@
             if (shiftsDone === 1 && img) {
                 img.classList.add('zoomed');
             }
-            if (shiftsDone === 2 && img) {
-                img.classList.add('photo-pan-shift');
-            }
 
-            if (shiftsDone >= maxShiftsBeforeFreeScroll) {
+            if (shiftsDone >= 2) {
                 window.removeEventListener("wheel", handleWheel, { passive: false });
             }
 
@@ -100,9 +96,14 @@
     function handleWheel(e) {
         if (e.deltaY <= 0) return;
 
-        // Блокируем скролл, пока не показали нужные пары строк
-        if (shiftsDone < maxShiftsBeforeFreeScroll) {
+        if (shiftsDone === 0) {
             e.preventDefault();
+            shiftLines();
+            return;
+        }
+        if (shiftsDone === 1) {
+            e.preventDefault();
+            if (img) img.classList.add('photo-pan-shift');
             shiftLines();
         }
     }

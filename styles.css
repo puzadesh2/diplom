@@ -65,10 +65,11 @@ body {
 }
 
 /*
-  Первый слайд (test8): картинка шире блока и прижата вправо — тогда translate не оставляет «дыр» с фоном.
-  Иначе при width:100% сдвиг вправо открывает слева фон родителя, а не другой участок файла.
+  test8: слой шире блока (иначе при сдвиге виден фон). Панорама — object-position 100% → 0%:
+  весь горизонт кадра при cover, левый край в кадре в конце, масштаб не трогаем.
 */
 .page > .wrapper:first-child .photo {
+    --photo-pan-nudge: 12%; /* сильнее вправо → больше %, или width: 170% и т.д. */
     position: absolute;
     top: 0;
     right: 0;
@@ -77,20 +78,28 @@ body {
     max-width: none;
     height: 100%;
     object-fit: cover;
-    object-position: right center;
-    transition: transform 1s ease-in-out;
+    object-position: 100% 50%;
+    transition: transform 1s ease-in-out, object-position 1.5s ease-in-out;
+    z-index: 0;
 }
 
 .page > .wrapper:first-child .photo.zoomed {
-    transform: scale(1.3);
-    transform-origin: left center;
+    transform: scale(1.5);
+    /* левый край видимой области (при width:150% + right:0 это ⅓ ширины img), не правый край кадра */
+    transform-origin: 33.333% 50%;
+}
+
+.page > .wrapper:first-child .photo.photo-pan-shift {
+    object-position: 0% 50%;
 }
 
 .page > .wrapper:first-child .photo.zoomed.photo-pan-shift {
-    transform: scale(1.5) translateX(20%);
+    transform: scale(1.5) translateX(var(--photo-pan-nudge));
 }
+
 .intro-inner {
     position: absolute;   /* располагаем текст поверх картинки */
+    z-index: 1;
     top: 0;
     top: 10%;
     right: 0;
