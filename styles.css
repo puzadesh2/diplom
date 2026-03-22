@@ -42,6 +42,9 @@ body {
     background: #111;
     /* Якорь для position:absolute у .intro-inner — иначе координаты считаются от окна, не от слайда */
     position: relative;
+    /* Проценты и cqi внутри слайда считаются от реальной ширины блока с фото, не от vw */
+    container-type: inline-size;
+    container-name: slide;
 }
 
 /* На очень широких экранах не даём wrapper растягиваться бесконечно */
@@ -69,7 +72,7 @@ body {
   весь горизонт кадра при cover, левый край в кадре в конце, масштаб не трогаем.
 */
 .page > .wrapper:first-child .photo {
-    --photo-pan-nudge: 12%; /* сильнее вправо → больше %, или width: 170% и т.д. */
+    --photo-pan-nudge: 20%; /* сильнее вправо → больше %, или width: 170% и т.д. */
     position: absolute;
     top: 0;
     right: 0;
@@ -79,8 +82,14 @@ body {
     height: 100%;
     object-fit: cover;
     object-position: 100% 50%;
-    transition: transform 1s ease-in-out, object-position 1.5s ease-in-out;
+    /* Только transform: иначе при первой отрисовке анимируется смена object-position с дефолта (50%) на 100% — видна «лишняя» часть кадра */
+    transition: transform 1s ease-in-out;
     z-index: 0;
+}
+
+/* Плавный сдвиг панорамы включаем после первого кадра (см. script.js), когда начальное положение уже зафиксировано */
+.page > .wrapper:first-child .photo.photo-pan-interactive {
+    transition: transform 1s ease-in-out, object-position 1.5s ease-in-out;
 }
 
 .page > .wrapper:first-child .photo.zoomed {
@@ -103,6 +112,11 @@ body {
     top: 0;
     top: 10%;
     right: 0;
+    /* Доля ширины слайда — при ресайзе окна панель остаётся на том же месте и не шире картинки */
+    width: 45%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -112,40 +126,57 @@ body {
 }
 
 .lines-container {
-    position: absolute;
-    width: 45vw;
-    height: calc(
-            2 * (4vw * 1.25) +
-            2 * 0.5rem +   /* padding сверху и снизу у каждой строки */
-            0.3rem );
+    position: relative;
+    width: 100%;
+    /* Базовый размер шрифта здесь — для 1lh / высоты в две строки */
+    font-size: clamp(0.5rem, 3.25cqi, 1.95rem);
+    /* ≥1.35 — запас под выносные элементы (у, р, ц…); иначе «ножки» режутся при overflow */
+    line-height: 1.38;
+    --lines-gap: 0.45em;
+    /* Две строки + зазор между ними + padding плашки */
+    min-height: calc(2 * 1lh + var(--lines-gap) + 1.3rem);
     overflow: hidden;
     margin-bottom: 1.5rem;
     background: rgba(255, 255, 255, 0.8);
-    padding: 0.5rem;
+    padding: 0.65rem 0.5rem;
     border-radius: 0.5rem;
-
+    box-sizing: border-box;
 }
 
 .lines {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+    left: 0.5rem;
+    right: 0.5rem;
+    top: 0.65rem;
+    bottom: 0.65rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--lines-gap, 0.45em);
     transition: transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1),
     opacity 0.7s ease;
     will-change: transform, opacity;
+    min-width: 0;
 }
 
 .line-item {
-    font-size: clamp(0.65rem, 3.25vw, 1.95rem);
-    line-height: 1.25;
+    font-size: inherit;
+    line-height: inherit;
     font-weight: 500;
     letter-spacing: 0.02em;
     text-align: center;
     opacity: 1;
     transition: opacity 0.35s ease, transform 0.35s ease;
     will-change: transform, opacity;
-    padding: 0.2rem 0;
+    padding: 0.12em 0;
+    /* Ровно одна визуальная строка на строку стиха → всего две строки в блоке */
+    flex: 0 0 auto;
+    min-height: 0;
+    /* Обрезаем только по ширине; по высоте не режем — иначе обрезаются выносные элементы */
+    overflow-x: clip;
+    overflow-y: visible;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .line-item.fading {
