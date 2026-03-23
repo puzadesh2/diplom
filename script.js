@@ -8,9 +8,21 @@
 
     const linesContainer = document.querySelector(".lines");
     const linesContainerBox = linesContainer && linesContainer.closest(".lines-container");
+    const introInnerBox = document.querySelector(".page > .wrapper:first-child .intro-inner");
     const hint = document.getElementById("hint");
     const photoStage = document.querySelector(".page > .wrapper:first-child .photo-stage");
+    const firstWrapper = photoStage && photoStage.closest(".wrapper");
     const img = photoStage && photoStage.querySelector(".photo-bg");
+    let noMotionTimer;
+
+    function disableOverlayMotionTemporarily() {
+        if (!photoStage) return;
+        photoStage.classList.add("no-motion");
+        clearTimeout(noMotionTimer);
+        noMotionTimer = setTimeout(() => {
+            photoStage.classList.remove("no-motion");
+        }, 140);
+    }
 
     function syncOverlayWithPhotoPan() {
         if (!photoStage || !img || !img.naturalWidth || !img.naturalHeight) return;
@@ -23,9 +35,18 @@
         const boxRatio = boxW / boxH;
         const renderedW = imgRatio > boxRatio ? boxH * imgRatio : boxW;
         const overflowX = Math.max(0, renderedW - boxW);
+        const stageW = photoStage.clientWidth || 0;
+        const nudgePercentRaw = getComputedStyle(photoStage).getPropertyValue("--photo-pan-nudge").trim();
+        const nudgePercent = parseFloat(nudgePercentRaw);
+        const nudgePx = Number.isFinite(nudgePercent) ? (stageW * nudgePercent / 100) : 0;
 
         /* object-position: 100% -> 0% двигает содержимое фото вправо на overflowX px */
         photoStage.style.setProperty("--photo-bg-pan-x", `${overflowX.toFixed(2)}px`);
+        photoStage.style.setProperty("--photo-pan-nudge-px", `${nudgePx.toFixed(2)}px`);
+        if (firstWrapper) {
+            firstWrapper.style.setProperty("--photo-bg-pan-x", `${overflowX.toFixed(2)}px`);
+            firstWrapper.style.setProperty("--photo-pan-nudge-px", `${nudgePx.toFixed(2)}px`);
+        }
     }
 
     /** Подбирает font-size на .lines-container так, чтобы обе строки стиха помещались в одну линию каждая (всего 2 строки). */
@@ -35,29 +56,38 @@
         if (!items.length) return;
 
         linesContainerBox.style.fontSize = "";
+        void linesContainerBox.offsetWidth;
         const maxPx = parseFloat(getComputedStyle(linesContainerBox).fontSize) || 31;
 
-        function fits(px) {
+        function allFit(px) {
             linesContainerBox.style.fontSize = px + "px";
+            void linesContainerBox.offsetWidth;
             for (let i = 0; i < items.length; i++) {
-                if (items[i].scrollWidth > items[i].clientWidth + 0.5) return false;
+                const el = items[i];
+                if (el.scrollWidth > el.clientWidth + 0.25) return false;
             }
             return true;
         }
 
-        if (fits(maxPx)) {
+        if (allFit(maxPx)) {
             linesContainerBox.style.fontSize = maxPx + "px";
             return;
         }
 
-        let lo = 6;
+        let lo = 4;
         let hi = maxPx;
-        while (hi - lo > 0.25) {
+        while (hi - lo > 0.2) {
             const mid = (lo + hi) / 2;
-            if (fits(mid)) lo = mid;
+            if (allFit(mid)) lo = mid;
             else hi = mid;
         }
-        linesContainerBox.style.fontSize = lo + "px";
+
+        let finalPx = lo;
+        while (finalPx > 4 && !allFit(finalPx)) {
+            finalPx -= 0.25;
+        }
+        linesContainerBox.style.fontSize = finalPx + "px";
+        void linesContainerBox.offsetWidth;
     }
 
     function scheduleFitTwoLinesFont() {
@@ -66,12 +96,16 @@
 
     let resizeFitTimer;
     window.addEventListener("resize", () => {
+        disableOverlayMotionTemporarily();
         clearTimeout(resizeFitTimer);
         resizeFitTimer = setTimeout(scheduleFitTwoLinesFont, 100);
     });
 
     if (linesContainerBox && typeof ResizeObserver !== "undefined") {
         new ResizeObserver(() => scheduleFitTwoLinesFont()).observe(linesContainerBox);
+    }
+    if (introInnerBox && typeof ResizeObserver !== "undefined") {
+        new ResizeObserver(() => scheduleFitTwoLinesFont()).observe(introInnerBox);
     }
 
     if (photoStage && img) {
@@ -118,6 +152,7 @@
             }).observe(photoStage);
         }
         window.addEventListener("resize", () => {
+            disableOverlayMotionTemporarily();
             resizeAnim();
             syncOverlayWithPhotoPan();
         });
@@ -132,15 +167,15 @@
         "И днём и ночью кот учёный",
         "Всё ходит по цепи кругом;",
         "Идёт направо — песнь заводит,",
-        "Налево — сказку говорит.",
-        "Там чудеса: там леший бродит,",
-        "Русалка на ветвях сидит;"
+        "Налево — сказку говорит."
     ];
 
-    /* [0,1] → скролл1: [2,3]+zoom → скролл2: [4,5] → скролл3: пан влево + [6,7]; после 3-го шага снимается wheel */
+    /* [0,1] → скролл1: [2,3]+zoom → скролл2: [4,5] → скролл3: только панорама, без смены строк */
     let currentIndex = 2;
     let animating = false;
     let shiftsDone = 0;
+    /** После третьего скролла (панорама) — ещё держим wheel с preventDefault, иначе следующие события того же жеста прокрутят страницу */
+    let panWheelHandled = false;
 
     function createLine(text) {
         const div = document.createElement("div");
@@ -210,18 +245,17 @@
                 photoStage.classList.add("zoomed");
             }
 
-            /* Не снимать на shiftsDone === 2: на этих строках ещё нужен третий скролл (панорама влево + [6,7]) */
-            if (shiftsDone >= 3) {
-                window.removeEventListener("wheel", handleWheel, { passive: false });
-            }
-
             animating = false;
         }, 350); // быстрый переход, почти без "белого" промежутка
     }
 
     function handleWheel(e) {
         if (e.deltaY <= 0) return;
-        if (shiftsDone >= 3) return;
+
+        if (panWheelHandled) {
+            e.preventDefault();
+            return;
+        }
 
         e.preventDefault();
 
@@ -234,8 +268,14 @@
             return;
         }
         if (shiftsDone === 2) {
+            panWheelHandled = true;
             if (photoStage) photoStage.classList.add("photo-pan-shift");
-            shiftLines();
+            if (firstWrapper) firstWrapper.classList.add("lines-pan-shift");
+            /* 2.2s transform + запас; пока слушатель жив — все wheel вниз гасим */
+            const unlockMs = 3200;
+            setTimeout(() => {
+                window.removeEventListener("wheel", handleWheel, { passive: false });
+            }, unlockMs);
         }
     }
 

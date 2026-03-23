@@ -45,6 +45,12 @@ body {
     /* Проценты и cqi внутри слайда считаются от реальной ширины блока с фото, не от vw */
     container-type: inline-size;
     container-name: slide;
+    --overlay-font-size: clamp(0.5rem, 3.25cqi, 1.95rem);
+    --overlay-line-height: 1.38;
+    --overlay-font-weight: 500;
+    --overlay-letter-spacing: 0.02em;
+    --overlay-text-color: #000000;
+    --overlay-text-shadow: 0 2px 8px rgba(255, 255, 255, 0.7);
 }
 
 /* На очень широких экранах не даём wrapper растягиваться бесконечно */
@@ -72,7 +78,8 @@ body {
   Панорама — object-position у .photo-bg: 100% → 0%.
 */
 .page > .wrapper:first-child .photo-stage {
-    --photo-pan-nudge: 20%;
+    --photo-pan-nudge: 30%;
+    --photo-zoom-scale: 1.5;
     position: absolute;
     top: 0;
     right: 0;
@@ -98,8 +105,8 @@ body {
 }
 
 .page > .wrapper:first-child .photo-stage.zoomed {
-    transform: scale(1.5);
-    transform-origin: 33.333% 70%;
+    transform: scale(var(--photo-zoom-scale));
+    transform-origin: 33.333% 75%;
 }
 
 .page > .wrapper:first-child .photo-stage.photo-pan-shift .photo-bg {
@@ -107,7 +114,9 @@ body {
 }
 
 .page > .wrapper:first-child .photo-stage.zoomed.photo-pan-shift {
-    transform: scale(1.5) translateX(var(--photo-pan-nudge));
+    transform: scale(var(--photo-zoom-scale)) translateX(var(--photo-pan-nudge));
+    /* Медленнее только сдвиг вправо; zoom остаётся с базовой скоростью 1s */
+    transition-duration: 2.2s;
 }
 
 /* mermaid1.json / тот же ролик, что в mermaid1.lottie — масштабируется вместе со stage */
@@ -137,12 +146,59 @@ body {
     transform: translateX(var(--photo-bg-pan-x, 0px));
 }
 
+/* Во время resize выключаем плавность, чтобы не было "плавания" и запаздывания */
+.page > .wrapper:first-child .photo-stage.no-motion .photo-lottie {
+    transition: none;
+}
+
 /* Когда запускается панорама, русалка приходит в целевую позицию */
 
 .page > .wrapper:first-child .photo-lottie svg {
     width: 100% !important;
     height: 100% !important;
     display: block;
+}
+
+/* Внутри .photo-stage — как русалка: zoom и панорама идут вместе с изображением */
+.page > .wrapper:first-child .photo-static-text {
+    --static-text-left-on-image: -2%;
+    --static-text-top-on-image: 30%;
+    position: absolute;
+    left: var(--static-text-left-on-image);
+    top: var(--static-text-top-on-image);
+    z-index: 2;
+    color: var(--overlay-text-color);
+    text-shadow: var(--overlay-text-shadow);
+    font-size: var(--overlay-font-size);
+    line-height: var(--overlay-line-height);
+    font-weight: var(--overlay-font-weight);
+    letter-spacing: var(--overlay-letter-spacing);
+    transform: translateX(0) scale(1);
+    transform-origin: top left;
+    transition: transform 1.5s ease-in-out;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Компенсация zoom у .photo-stage — размер шрифта на экране не растёт вместе с картинкой */
+.page > .wrapper:first-child .photo-stage.zoomed:not(.photo-pan-shift) .photo-static-text {
+    transform: translateX(0) scale(calc(1 / var(--photo-zoom-scale)));
+}
+
+.page > .wrapper:first-child .photo-stage.zoomed.photo-pan-shift .photo-static-text {
+    transform: translateX(var(--photo-bg-pan-x, 0px)) scale(calc(1 / var(--photo-zoom-scale)));
+}
+
+.page > .wrapper:first-child .photo-static-line {
+    white-space: nowrap;
+}
+
+.page > .wrapper:first-child .photo-static-line + .photo-static-line {
+    margin-top: 0.3em;
+}
+
+.page > .wrapper:first-child .photo-stage.no-motion .photo-static-text {
+    transition: none;
 }
 
 .intro-inner {
@@ -159,18 +215,27 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    color: #000000;
-    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.7);
+    color: var(--overlay-text-color);
+    text-shadow: var(--overlay-text-shadow);
     background: rgba(255, 255, 255, 0.8);
+}
+
+.page > .wrapper:first-child .intro-inner {
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+}
+
+.page > .wrapper:first-child.lines-pan-shift .intro-inner {
+    opacity: 0;
 }
 
 .lines-container {
     position: relative;
     width: 100%;
     /* Базовый размер шрифта здесь — для 1lh / высоты в две строки */
-    font-size: clamp(0.5rem, 3.25cqi, 1.95rem);
+    font-size: var(--overlay-font-size);
     /* ≥1.35 — запас под выносные элементы (у, р, ц…); иначе «ножки» режутся при overflow */
-    line-height: 1.38;
+    line-height: var(--overlay-line-height);
     --lines-gap: 0.3em;
     /* Две строки + зазор между ними + padding плашки */
     min-height: calc(2 * 1lh + var(--lines-gap) + 1.3rem);
@@ -201,8 +266,8 @@ body {
 .line-item {
     font-size: inherit;
     line-height: inherit;
-    font-weight: 500;
-    letter-spacing: 0.02em;
+    font-weight: var(--overlay-font-weight);
+    letter-spacing: var(--overlay-letter-spacing);
     text-align: center;
     opacity: 1;
     transition: opacity 0.35s ease, transform 0.35s ease;
@@ -211,10 +276,10 @@ body {
     /* Ровно одна визуальная строка на строку стиха → всего две строки в блоке */
     flex: 0 0 auto;
     min-height: 0;
-    /* Обрезаем только по ширине; по высоте не режем — иначе обрезаются выносные элементы */
-    overflow-x: clip;
+    /* Без многоточия: размер подбирает script.js (fitTwoLinesFont) */
+    overflow-x: hidden;
     overflow-y: visible;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     white-space: nowrap;
 }
 
