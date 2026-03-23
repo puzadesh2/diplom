@@ -68,11 +68,11 @@ body {
 }
 
 /*
-  test8: слой шире блока (иначе при сдвиге виден фон). Панорама — object-position 100% → 0%:
-  весь горизонт кадра при cover, левый край в кадре в конце, масштаб не трогаем.
+  Первый слайд: общий блок .photo-stage — zoom/pan двигают и test10, и Lottie поверх.
+  Панорама — object-position у .photo-bg: 100% → 0%.
 */
-.page > .wrapper:first-child .photo {
-    --photo-pan-nudge: 20%; /* сильнее вправо → больше %, или width: 170% и т.д. */
+.page > .wrapper:first-child .photo-stage {
+    --photo-pan-nudge: 20%;
     position: absolute;
     top: 0;
     right: 0;
@@ -80,30 +80,69 @@ body {
     width: 150%;
     max-width: none;
     height: 100%;
+    z-index: 0;
+    transition: transform 1s ease-in-out;
+}
+
+.page > .wrapper:first-child .photo-stage .photo-bg {
+    width: 100%;
+    height: 100%;
+    display: block;
     object-fit: cover;
     object-position: 100% 50%;
-    /* Только transform: иначе при первой отрисовке анимируется смена object-position с дефолта (50%) на 100% — видна «лишняя» часть кадра */
-    transition: transform 1s ease-in-out;
-    z-index: 0;
 }
 
-/* Плавный сдвиг панорамы включаем после первого кадра (см. script.js), когда начальное положение уже зафиксировано */
-.page > .wrapper:first-child .photo.photo-pan-interactive {
-    transition: transform 1s ease-in-out, object-position 1.5s ease-in-out;
+/* Плавный сдвиг панорамы — только после photo-pan-interactive (см. script.js) */
+.page > .wrapper:first-child .photo-stage.photo-pan-interactive .photo-bg {
+    transition: object-position 1.5s ease-in-out;
 }
 
-.page > .wrapper:first-child .photo.zoomed {
+.page > .wrapper:first-child .photo-stage.zoomed {
     transform: scale(1.5);
-    /* левый край видимой области (при width:150% + right:0 это ⅓ ширины img), не правый край кадра */
-    transform-origin: 33.333% 50%;
+    transform-origin: 33.333% 70%;
 }
 
-.page > .wrapper:first-child .photo.photo-pan-shift {
+.page > .wrapper:first-child .photo-stage.photo-pan-shift .photo-bg {
     object-position: 0% 50%;
 }
 
-.page > .wrapper:first-child .photo.zoomed.photo-pan-shift {
+.page > .wrapper:first-child .photo-stage.zoomed.photo-pan-shift {
     transform: scale(1.5) translateX(var(--photo-pan-nudge));
+}
+
+/* mermaid1.json / тот же ролик, что в mermaid1.lottie — масштабируется вместе со stage */
+.page > .wrapper:first-child .photo-lottie {
+    position: absolute;
+    /* Позиция считается от НАЧАЛА широкого изображения (.photo-stage), не от видимой области */
+    left: 22%;
+    bottom: 23%;
+    width: min(25%, 14cqi);
+    aspect-ratio: 683 / 1052;
+    max-height: 78%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+    /* Показываем после DOMLoaded у Lottie, чтобы не было стартового сдвига */
+    opacity: 0;
+    transition: transform 1.5s ease-in-out, opacity 0.15s linear;
+}
+
+.page > .wrapper:first-child .photo-lottie.ready {
+    opacity: 1;
+}
+
+/* При панораме фото (object-position 100% -> 0%) двигаем Lottie на тот же пиксельный сдвиг,
+   чтобы она оставалась привязана к содержимому test10, а не к видимой области. */
+.page > .wrapper:first-child .photo-stage.photo-pan-shift .photo-lottie {
+    transform: translateX(var(--photo-bg-pan-x, 0px));
+}
+
+/* Когда запускается панорама, русалка приходит в целевую позицию */
+
+.page > .wrapper:first-child .photo-lottie svg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
 }
 
 .intro-inner {
@@ -132,7 +171,7 @@ body {
     font-size: clamp(0.5rem, 3.25cqi, 1.95rem);
     /* ≥1.35 — запас под выносные элементы (у, р, ц…); иначе «ножки» режутся при overflow */
     line-height: 1.38;
-    --lines-gap: 0.45em;
+    --lines-gap: 0.3em;
     /* Две строки + зазор между ними + padding плашки */
     min-height: calc(2 * 1lh + var(--lines-gap) + 1.3rem);
     overflow: hidden;

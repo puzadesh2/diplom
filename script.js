@@ -9,7 +9,24 @@
     const linesContainer = document.querySelector(".lines");
     const linesContainerBox = linesContainer && linesContainer.closest(".lines-container");
     const hint = document.getElementById("hint");
-    const img = document.querySelector('.page > .wrapper:first-child .photo');
+    const photoStage = document.querySelector(".page > .wrapper:first-child .photo-stage");
+    const img = photoStage && photoStage.querySelector(".photo-bg");
+
+    function syncOverlayWithPhotoPan() {
+        if (!photoStage || !img || !img.naturalWidth || !img.naturalHeight) return;
+
+        const boxW = img.clientWidth;
+        const boxH = img.clientHeight;
+        if (!boxW || !boxH) return;
+
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const boxRatio = boxW / boxH;
+        const renderedW = imgRatio > boxRatio ? boxH * imgRatio : boxW;
+        const overflowX = Math.max(0, renderedW - boxW);
+
+        /* object-position: 100% -> 0% двигает содержимое фото вправо на overflowX px */
+        photoStage.style.setProperty("--photo-bg-pan-x", `${overflowX.toFixed(2)}px`);
+    }
 
     /** Подбирает font-size на .lines-container так, чтобы обе строки стиха помещались в одну линию каждая (всего 2 строки). */
     function fitTwoLinesFont() {
@@ -57,16 +74,57 @@
         new ResizeObserver(() => scheduleFitTwoLinesFont()).observe(linesContainerBox);
     }
 
-    if (img) {
-        const enablePanTransition = () => img.classList.add('photo-pan-interactive');
+    if (photoStage && img) {
+        const enablePanTransition = () => photoStage.classList.add("photo-pan-interactive");
         if (img.complete) {
             requestAnimationFrame(() => requestAnimationFrame(enablePanTransition));
+            requestAnimationFrame(() => requestAnimationFrame(syncOverlayWithPhotoPan));
         } else {
-            img.addEventListener('load', () => {
-                requestAnimationFrame(() => requestAnimationFrame(enablePanTransition));
-            }, { once: true });
+            img.addEventListener(
+                "load",
+                () => {
+                    requestAnimationFrame(() => requestAnimationFrame(enablePanTransition));
+                    requestAnimationFrame(() => requestAnimationFrame(syncOverlayWithPhotoPan));
+                },
+                { once: true }
+            );
         }
     }
+
+    (function initMermaidLottie() {
+        const el = document.getElementById("mermaid-lottie");
+        if (!el || typeof lottie === "undefined") return;
+        const anim = lottie.loadAnimation({
+            container: el,
+            renderer: "svg",
+            loop: true,
+            autoplay: true,
+            path: "images/mermaid1.json",
+            rendererSettings: {
+                preserveAspectRatio: "xMidYMid meet",
+            },
+        });
+        function resizeAnim() {
+            if (anim && typeof anim.resize === "function") anim.resize();
+        }
+        function showReady() {
+            resizeAnim();
+            requestAnimationFrame(() => el.classList.add("ready"));
+        }
+        if (photoStage && typeof ResizeObserver !== "undefined") {
+            new ResizeObserver(() => {
+                resizeAnim();
+                syncOverlayWithPhotoPan();
+            }).observe(photoStage);
+        }
+        window.addEventListener("resize", () => {
+            resizeAnim();
+            syncOverlayWithPhotoPan();
+        });
+        anim.addEventListener("DOMLoaded", showReady);
+        resizeAnim();
+        syncOverlayWithPhotoPan();
+    })();
 
     const poemLines = [
         "У лукоморья дуб зелёный;",
@@ -148,8 +206,8 @@
 
             shiftsDone++;
 
-            if (shiftsDone === 1 && img) {
-                img.classList.add('zoomed');
+            if (shiftsDone === 1 && photoStage) {
+                photoStage.classList.add("zoomed");
             }
 
             /* Не снимать на shiftsDone === 2: на этих строках ещё нужен третий скролл (панорама влево + [6,7]) */
@@ -176,7 +234,7 @@
             return;
         }
         if (shiftsDone === 2) {
-            if (img) img.classList.add('photo-pan-shift');
+            if (photoStage) photoStage.classList.add("photo-pan-shift");
             shiftLines();
         }
     }
