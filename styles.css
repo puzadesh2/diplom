@@ -73,6 +73,68 @@ body {
     transition: transform 0.75s ease-out;
 }
 
+/* test14: обёртка как у слайда с картинкой + текст поверх (как .photo-stage + .photo-static-text) */
+.page > .wrapper:nth-child(2) .slide-photo-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* test14: сначала низ кадра; после скролла — панорама вверх до верха (как object-position у test12) */
+.page > .wrapper:nth-child(2) .slide-photo-wrap .photo {
+    object-position: center bottom;
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-interactive .photo {
+    transition: object-position 1.5s ease-in-out;
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-vertical-shift .photo {
+    object-position: center top;
+}
+
+/* Текст «прибит» к пикселям картинки: при панораме вверх уезжает вниз вместе с нижней частью кадра */
+.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-interactive .photo-static-text {
+    transition: transform 1.5s ease-in-out;
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap .photo-static-text {
+    --static-text-right-on-image: 4%;
+    --static-text-top-on-image: 13%;
+    position: absolute;
+    right: var(--static-text-right-on-image);
+    top: var(--static-text-top-on-image);
+    z-index: 1;
+    color: var(--overlay-text-color);
+    text-shadow: var(--overlay-text-shadow);
+    font-size: var(--overlay-font-size);
+    line-height: var(--overlay-line-height);
+    font-weight: var(--overlay-font-weight);
+    letter-spacing: var(--overlay-letter-spacing);
+    pointer-events: none;
+    user-select: none;
+    transform: translateY(0);
+    transform-origin: top right;
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-vertical-shift .photo-static-text {
+    transform: translateY(var(--test14-text-pan-y, 0px));
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap.no-motion .photo,
+.page > .wrapper:nth-child(2) .slide-photo-wrap.no-motion .photo-static-text {
+    transition: none !important;
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap .photo-static-line {
+    white-space: nowrap;
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap .photo-static-line + .photo-static-line {
+    margin-top: 0.3em;
+}
+
 /*
   Первый слайд: общий блок .photo-stage — zoom/pan двигают и test10, и Lottie поверх.
   Панорама — object-position у .photo-bg: 100% → 0%.

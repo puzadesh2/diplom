@@ -176,6 +176,172 @@
     let shiftsDone = 0;
     /** После третьего скролла (панорама) — ещё держим wheel с preventDefault, иначе следующие события того же жеста прокрутят страницу */
     let panWheelHandled = false;
+    let scrollToTest14Initialized = false;
+
+    const test14SlideWrap = document.querySelector(".page > .wrapper:nth-child(2) .slide-photo-wrap");
+    const test14Img = test14SlideWrap && test14SlideWrap.querySelector(".photo");
+    let test14NoMotionTimer;
+
+    function disableTest14MotionTemporarily() {
+        if (!test14SlideWrap) return;
+        test14SlideWrap.classList.add("no-motion");
+        clearTimeout(test14NoMotionTimer);
+        test14NoMotionTimer = setTimeout(() => {
+            test14SlideWrap.classList.remove("no-motion");
+        }, 140);
+    }
+
+    /** Вертикальный overflow при cover — на сколько пикселей смещается кадр при object-position bottom → top */
+    function syncTest14TextPanY() {
+        if (!test14SlideWrap || !test14Img || !test14Img.naturalWidth || !test14Img.naturalHeight) return;
+        const boxW = test14Img.clientWidth;
+        const boxH = test14Img.clientHeight;
+        if (!boxW || !boxH) return;
+        const imgRatio = test14Img.naturalWidth / test14Img.naturalHeight;
+        const boxRatio = boxW / boxH;
+        const renderedH = imgRatio > boxRatio ? boxH : boxW / imgRatio;
+        const overflowY = Math.max(0, renderedH - boxH);
+        test14SlideWrap.style.setProperty("--test14-text-pan-y", `${overflowY.toFixed(2)}px`);
+    }
+
+    if (test14SlideWrap && test14Img) {
+        const enableTest14PanTransition = () => {
+            test14SlideWrap.classList.add("photo-pan-interactive");
+            requestAnimationFrame(() => requestAnimationFrame(syncTest14TextPanY));
+        };
+        if (test14Img.complete) {
+            requestAnimationFrame(() => requestAnimationFrame(enableTest14PanTransition));
+        } else {
+            test14Img.addEventListener(
+                "load",
+                () => {
+                    requestAnimationFrame(() => requestAnimationFrame(enableTest14PanTransition));
+                },
+                { once: true }
+            );
+        }
+        if (typeof ResizeObserver !== "undefined") {
+            new ResizeObserver(() => {
+                disableTest14MotionTemporarily();
+                syncTest14TextPanY();
+            }).observe(test14SlideWrap);
+        }
+        window.addEventListener("resize", () => {
+            disableTest14MotionTemporarily();
+            syncTest14TextPanY();
+        });
+    }
+
+    /** После сценария с колесом: следующий скролл вниз с экрана со статичным текстом — плавно показать целиком слайд с test14, колесо блокируется на время анимации */
+    function initScrollToTest14OnWheel() {
+        if (scrollToTest14Initialized) return;
+        scrollToTest14Initialized = true;
+
+        const staticTextEl = document.querySelector(".page > .wrapper:first-child .photo-static-text");
+        const test14Wrapper = document.querySelector(".page > .wrapper:nth-child(2)");
+        if (!test14Wrapper) return;
+
+        let test14VerticalPanDone = false;
+        let test14VerticalPanAnimating = false;
+        const test14PanDurationMs = 2200;
+
+        let userSeesTextScreen = false;
+        if (staticTextEl && typeof IntersectionObserver !== "undefined") {
+            const io = new IntersectionObserver(
+                (entries) => {
+                    for (const en of entries) {
+                        if (en.isIntersecting && en.intersectionRatio >= 0.15) userSeesTextScreen = true;
+                    }
+                },
+                { threshold: [0, 0.15, 0.35] }
+            );
+            io.observe(staticTextEl);
+        } else {
+            userSeesTextScreen = true;
+        }
+
+        requestAnimationFrame(() => {
+            if (staticTextEl) {
+                const r = staticTextEl.getBoundingClientRect();
+                if (r.top < window.innerHeight && r.bottom > 0) userSeesTextScreen = true;
+            }
+        });
+
+        let scrollAnimating = false;
+
+        function isTest14FullyVisible() {
+            const r = test14Wrapper.getBoundingClientRect();
+            const pad = 4;
+            return r.top >= -pad && r.bottom <= window.innerHeight + pad;
+        }
+
+        function targetYToShowTest14() {
+            const h = test14Wrapper.offsetHeight;
+            const vh = window.innerHeight;
+            const top = test14Wrapper.offsetTop;
+            if (h >= vh) return Math.max(0, top);
+            return Math.max(0, top - (vh - h) / 2);
+        }
+
+        function smoothScrollWindowTo(targetY, durationMs, done) {
+            const startY = window.scrollY;
+            const dist = targetY - startY;
+            const t0 = performance.now();
+
+            function frame(now) {
+                const t = Math.min((now - t0) / durationMs, 1);
+                const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                window.scrollTo(0, startY + dist * ease);
+                if (t < 1) requestAnimationFrame(frame);
+                else if (typeof done === "function") done();
+            }
+            requestAnimationFrame(frame);
+        }
+
+        function handlePostPoemWheel(e) {
+            if (e.deltaY <= 0) return;
+
+            if (test14VerticalPanAnimating) {
+                e.preventDefault();
+                return;
+            }
+
+            if (scrollAnimating) {
+                e.preventDefault();
+                return;
+            }
+
+            if (!userSeesTextScreen) return;
+
+            if (isTest14FullyVisible()) {
+                if (!test14VerticalPanDone && test14SlideWrap) {
+                    e.preventDefault();
+                    test14VerticalPanAnimating = true;
+                    syncTest14TextPanY();
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            test14SlideWrap.classList.add("photo-pan-vertical-shift");
+                        });
+                    });
+                    setTimeout(() => {
+                        test14VerticalPanDone = true;
+                        test14VerticalPanAnimating = false;
+                    }, test14PanDurationMs);
+                }
+                return;
+            }
+
+            e.preventDefault();
+            scrollAnimating = true;
+            const dest = targetYToShowTest14();
+            const duration = 900;
+            smoothScrollWindowTo(dest, duration, () => {
+                scrollAnimating = false;
+            });
+        }
+
+        window.addEventListener("wheel", handlePostPoemWheel, { passive: false });
+    }
 
     function createLine(text) {
         const div = document.createElement("div");
@@ -275,6 +441,7 @@
             const unlockMs = 3200;
             setTimeout(() => {
                 window.removeEventListener("wheel", handleWheel, { passive: false });
+                initScrollToTest14OnWheel();
             }, unlockMs);
         }
     }
