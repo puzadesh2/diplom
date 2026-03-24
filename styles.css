@@ -94,17 +94,14 @@ body {
     object-position: center top;
 }
 
-/* Текст «прибит» к пикселям картинки: при панораме вверх уезжает вниз вместе с нижней частью кадра */
-.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-interactive .photo-static-text {
+/* Текст «прибит» к пикселям картинки — верх и низ едут синхронно с object-position */
+.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-interactive .photo-static-text--lower,
+.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-interactive .photo-static-text--upper {
     transition: transform 1.5s ease-in-out;
 }
 
 .page > .wrapper:nth-child(2) .slide-photo-wrap .photo-static-text {
-    --static-text-right-on-image: 4%;
-    --static-text-top-on-image: 13%;
     position: absolute;
-    right: var(--static-text-right-on-image);
-    top: var(--static-text-top-on-image);
     z-index: 1;
     color: var(--overlay-text-color);
     text-shadow: var(--overlay-text-shadow);
@@ -114,16 +111,39 @@ body {
     letter-spacing: var(--overlay-letter-spacing);
     pointer-events: none;
     user-select: none;
+}
+
+/* Как «Там чудеса…» на первом слайде: слева сверху; сначала над верхом кадра, при панораме входит в кадр */
+.page > .wrapper:nth-child(2) .slide-photo-wrap .photo-static-text--upper {
+    --static-text-right-on-image: 10%;
+    --static-text-top-on-image: 10%;
+    right: var(--static-text-right-on-image);
+    top: var(--static-text-top-on-image);
+    transform: translateY(calc(-1 * var(--test14-text-pan-y, 0px)));
+    transform-origin: top left;
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-vertical-shift .photo-static-text--upper {
+    transform: translateY(0);
+}
+
+/* Нижний куплет: справа, при панораме уходит вниз вместе с нижней частью фото */
+.page > .wrapper:nth-child(2) .slide-photo-wrap .photo-static-text--lower {
+    --static-text-left-on-image: 10%;
+    --static-text-bottom-on-image: 17%;
+    left: var(--static-text-left-on-image);
+    bottom: var(--static-text-bottom-on-image);
     transform: translateY(0);
     transform-origin: top right;
 }
 
-.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-vertical-shift .photo-static-text {
+.page > .wrapper:nth-child(2) .slide-photo-wrap.photo-pan-vertical-shift .photo-static-text--lower {
     transform: translateY(var(--test14-text-pan-y, 0px));
 }
 
 .page > .wrapper:nth-child(2) .slide-photo-wrap.no-motion .photo,
-.page > .wrapper:nth-child(2) .slide-photo-wrap.no-motion .photo-static-text {
+.page > .wrapper:nth-child(2) .slide-photo-wrap.no-motion .photo-static-text--lower,
+.page > .wrapper:nth-child(2) .slide-photo-wrap.no-motion .photo-static-text--upper {
     transition: none !important;
 }
 
