@@ -334,7 +334,7 @@
             e.preventDefault();
             scrollAnimating = true;
             const dest = targetYToShowTest14();
-            const duration = 900;
+            const duration = 1500;
             smoothScrollWindowTo(dest, duration, () => {
                 scrollAnimating = false;
             });
