@@ -12,6 +12,13 @@
     font-display: swap;
 }
 
+/* Пока вертикальный жест = только сценарий (стих/zoom/панорама/переход), без нативного скролла страницы. */
+html.touch-story-lock {
+    touch-action: none;
+    overscroll-behavior: none;
+    height: 100%;
+}
+
 body {
     font-family: "Monomakh Unicode", system-ui, sans-serif;
     background: #111;
@@ -161,6 +168,28 @@ body {
 
 .page > .wrapper:nth-child(2) .slide-photo-wrap .photo-static-line + .photo-static-line {
     margin-top: 0.3em;
+}
+
+/* След медведя: три вспышки после остановки скролла на сцену «Там на неведомых…» (логика в script.js). */
+.page > .wrapper:nth-child(2) .slide-photo-wrap .bear-paw-print {
+    position: absolute;
+    left: var(--paw-left, 56%);
+    bottom: var(--paw-bottom, 12%);
+    /* Ширина из JS: привязка к clientWidth/Height .photo (test14), см. syncBearPawPrintBaseToTest14 */
+    width: var(--paw-base-px, min(28cqi, 155px));
+    height: auto;
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    transform: translate(-50%, 0) scale(var(--paw-size, 1)) scaleX(var(--paw-flip, 1));
+    transform-origin: center center;
+    /* Длительности совпадают с fadeIn / fadeOut в scheduleBearPawTrailOnNavedomyhScene */
+    transition: opacity var(--paw-fade-ms, 800ms) cubic-bezier(0.33, 0.86, 0.56, 1);
+}
+
+.page > .wrapper:nth-child(2) .slide-photo-wrap .bear-paw-print.bear-paw-print--visible {
+    opacity: 1;
 }
 
 /*
